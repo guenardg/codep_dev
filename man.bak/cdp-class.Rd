@@ -12,7 +12,7 @@
 \title{ Class and methods for Multiscale Codependence Analysis involving
 multiple descriptors }
 \description{
-  Class and methods to handle Multiscale Codependence Analysis (mMCA)
+  Class and methods to handle Multiscale Codependence Analysis (MCA)
 }
 \usage{
 \method{print}{cdp}(x, ...)

@@ -12,7 +12,7 @@ eigenmap <- function(x,opt.coord=NA,weighting=Wf.sqrd,boundaries,wpar,select=.Ma
     } else {
       opt.coord <- as.matrix(opt.coord)
       if(nrow(opt.coord) != nrow(D)) {
-        stop(paste("You provided",nrow(opt.coord),
+        stop(paste("You provided", nrow(opt.coord),
                    "optional coordinates to reference", nrow(D),
                    "observations!"))
       } else rownames(opt.coord) <- rownames(D)
@@ -102,7 +102,7 @@ Wf.Drayf3 <- function(D,boundaries,wpar=1) {
   return(W)
 }
 ##
-eigenmap.score <- function(object,target) {
+eigenmap.score <- function(object, target) {
   if(!is.matrix(target)) attr(target,"dim") <- c(1L,length(target))
   n <- ncol(object$D)
   if(n != ncol(target))
