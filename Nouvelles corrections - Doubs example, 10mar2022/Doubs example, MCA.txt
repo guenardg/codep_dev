@@ -1,0 +1,66 @@
+###### Begin {Doubs example}
+#
+# The Doubs.rda file contains three data files; see ?Doubs
+data(Doubs)
+# Exclude site 8, where no fish were caught, from all Doubs files 
+Doubs.fish = Doubs.fish[-8,]
+Doubs.env = Doubs.env[-8,]
+Doubs.geo = Doubs.geo[-8,]
+# Hellinger-transform the fish species data, as in the Guénard & Legendre (2018) paper
+row.sums = rowSums(Doubs.fish)
+Doubs.fish.hel = sqrt(sweep(Doubs.fish,1,row.sums,"/"))
+# The Hellinger transformation can also be produced using vegan’s function decostand()
+#
+## Creating a spatial eigenvector map from the DSF = "Distance from source" variable
+map2 <- eigenmap(x=Doubs.geo[,"DFS"])
+# The eigenvalues are in map2$lambda, the MEM eigenvectors in matrix map2$U
+#
+## MCA with multivariate response data
+mca3 <- MCA(Y=Doubs.fish.hel,X=Doubs.env,emobj=map2)
+# mca3 ### remove this line ###     ### I suggest to remove this line: very long output ###
+mca3_pertest <- permute.cdp(mca3)
+\dontrun{     # Code not run during CRAN software tests
+## or:
+mca3_pertest <- parPermute.cdp(mca3,permute=999999)
+}
+mca3_pertest
+summary(mca3_pertest)
+par(mar = c(6,4,2,4))
+plot(mca3_pertest, las = 2)
+# Long array containing the codependence coefficients
+mca3_pertest$UpYXcb$C 
+#
+## Display the results along the transect
+spmeans <- colMeans(Doubs.fish.hel)
+pca1 <- svd(Doubs.fish.hel - rep(spmeans,each=nrow(Doubs.fish)))
+par(mar = c(5,5,2,5)+0.1)
+plot(y = pca1$u[,1L], x = Doubs.geo[,"DFS"], pch = 21L, bg = "red",
+     ylab = "PCA1 loadings", xlab = "Distance from river source (km)")
+#
+x <- seq(0,450,1)
+newdists <- matrix(NA, length(x), nrow(Doubs.geo))
+for(i in 1L:nrow(newdists))
+  newdists[i,] <- abs(Doubs.geo[,"DFS"] - x[i])
+#
+## Calculating predictions for arbitrary sites under the same set of
+## environmental conditions that the codependence model was built with.
+prd1 <- predict(mca3_pertest,
+                newdata=list(target = eigenmap.score(map2, newdists)))
+#
+## Projection of the predicted species abundance on pca1:
+Uprd1 <- (prd1 - rep(spmeans, each = nrow(prd1))) %*% pca1$v %*% diag(pca1$d^-1)
+lines(y = Uprd1[,1L], x = x, col=2, lty = 1)
+#
+## Projection of the predicted species abundance on pca2
+plot(y = pca1$u[,2L], x = Doubs.geo[,"DFS"], pch = 21L, bg = "red",
+     ylab = "PCA2 loadings", xlab = "Distance from river source (km)")
+lines(y = Uprd1[,2L], x = x, col=2, lty = 1)
+#
+## Displaying only the observed and predicted abundance for Brown Trout ("TRU")
+par(new=TRUE)
+plot(y = Doubs.fish.hel[,"TRU"],Doubs.geo[,"DFS"],pch=21L,bg="green",
+     ylab="",xlab="",new=FALSE,axes=FALSE)
+axis(4)
+ (species "TRU")
+#
+###### End {Doubs example}

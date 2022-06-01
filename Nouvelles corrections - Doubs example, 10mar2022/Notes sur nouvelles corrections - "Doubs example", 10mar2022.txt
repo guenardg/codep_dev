@@ -1,0 +1,31 @@
+# Nouvelle vérification de l'exemple 2 "Doubs example"
+# et quelques nouvelles corrections 
+
+Ces notes se rapportent au fichier séparé "Doubs example, MCA.txt"
+
+1. Première série de corrections: transformation de Hellinger des données de Doubs au début de l'exemple, ligne 5–12 dans le fichier "Doubs example, MCA.txt".
+
+Maintenant que nous comprenons davantage ce que font les transformations de données de communautés, il faut utiliser ces transformations dans nos exemples là où cela est approprié. Je proposais déjà cette modification dans le fichier "Multiscale codependence analysis – Examples.docx" du 18nov2021.
+
+Toutes les commandes qui suivent appellent le nouveau fichier "Y=Doubs.fish.hel" plutôt que "Y=log1p(Doubs.fish)"
+
+2. Je te signalais dans mon envoi d'hier que la ligne 192 comportait un opérateur "\%*\%" qui n'avais pas de sens connu pour moi. Dans mon message du 18nov2021, j'ai retrouvé cette commande et elle est écrite "%*%" J'ai donc fait le changement dans le code. Le graphique produit a du sens.
+Dans le nouveau fichier "Doubs example, MCA.txt", ce changement est à la ligne 53.
+
+3. Petits changements:
+• L 16–18 : nouvelles lignes de commentaire
+• L 20 : I suggest to remove this line: very long output, not really useful
+• L 31 : nouveau commentaire sur une ligne séparée, décrivant la ligne suivante "mca3_pertest$UpYXcb$C"
+
+4. L 30, plot(mca3_pertest, las = 2
+=> Pourrais-tu faire tracer des cadres rouges avec un trait plus large autour des cases significatives? Il est très difficile de trouver les 4 cases significatives dans ce graphique.
+
+5. L 46: quels sont les "arbitrary sites" dont parle ta phrase et pourquoi as-tu choisi ces sites pour la prédiction? Expliquer SVP."
+
+6. L 48–49: Que contient le grand tableau prd1? Pourquoi a-t-il 451 lignes? Cela semble bien mystérieux: expliquer SVP.
+
+7. L 52 : que fais-tu dans ce calcul? Que contient le vecteur Uprd1? Expliquer SVP
+
+8. L 55–65 : pourquoi fais-tu tracer "TRU" sur le graphique montrant pca2 au lieu de pca1? Les points rouges (pca2) ne semblent pas corrélés aux points verts représentant "TRU". Expliquer SVP. 
+
+========

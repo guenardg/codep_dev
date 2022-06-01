@@ -1,0 +1,41 @@
+=> Le dernier exemple du fichier commence par la phrase 
+   ### Printing the response variable
+La "response variable" contient 35 espèces d'oribates! Qu'est-ce qui sera représenté dans le dessin, au juste? SVP reformuler la phrase pour mieux expliquer.
+
+C'est la première composante (principale) de la structure de la communauté.
+
+Fichier "product-distribution.Rd"
+
+• Je peux atteindre le fichier d'aide en passant par le fichier d'aide ?codep et en cliquant sur l'hyperlien "Product-distribution", mais je ne peux pas l'atteindre en tapant
+   ?Product-distribution
+dans la console R. Mystère!
+
+Faire: ?`product-distribution`
+
+• Changement dans le fichier "product-distribution.Rd" à vérifier:
+Dans Details, paragraphe 2, tu avais écrit :
+" the Fisher-Scedecor \code{\link{df}} density distribution function."
+En cliquant sur le lien "df" dans la version compilée de ce fichier d'aide, j'aboutis au fichier d'aide de la fonction "FDist" de stats. 
+J'ai donc changé ta phrase pour:
+"of the Fisher-Scedecor \code{\link{FDist}} density distribution function."
+Est-correct? Je ne comprends pas comment le lien "df" pouvait conduire à "FDist".
+
+Je ne rencontre plus ce problème.
+
+
+Description de l'argument "target": vérifie la description que j'ai écrite. Je n'ai compris qu'après avoir examiné et fait tourner l'exemple 2.
+
+J'ai récris cette partie et je crois que c'esst plus clair maintenant.
+
+
+Paragraphe Details:
+• Tu as écrit qu'on pourrait calculer des 'eigenfunctions' à partir d'un graphique qui ne représenterait ni l'espace, ni le temps. Fournir des exemples SVP.
+Un exemple serait un graphe représentant la structure chimique d'une molécule, ou encore un réseau trophique.
+
+Plus présent.
+
+
+Details, parag. 4: vérifie ce que j'ai compris et écrit. – Ce paragraphe semble décrire une situation qui sera toujours respectée. Qu'arrivera-t-il si les distances ne sont pas du même type, ou pas dans les mêmes unités géographiques, dans scr et dans map (Example 2)? Cela produira-t-il une interruption de la fonction avec un message d'erreur? Ou est-il possible que la fonction ne s'en aperçoive pas et produise des résultats erronés?
+
+Ce n'était plus dans la dernière version.
+
