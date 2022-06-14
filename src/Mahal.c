@@ -33,18 +33,21 @@
  */
 
 void dist_Mahal(double* from, double* to, int* n, int* tri, int* m,
-                double* cov,
                 double* d,
-                int* sq, int* wt) {
+                double* cov, int* sq) {
   int end, i, j, k, l, ii, jj;
   double acc;
   end = (*tri) ? n[0]*(n[0]-1)/2 : n[0]*n[1];
   for(i = 0, j = (*tri) ? 1 : 0, k = 0; k < end; k++) {
     for(l = 0, ii = i, jj = j; l < *m; l++,
         ii += n[0], jj += n[1]) {
+      //
+      // mod from here...
       acc = from[ii] - to[jj];
       acc *= acc;
       d[k] += acc;
+      // mod to there.
+      //
     }
     if(!*sq)
       d[k] = sqrt(d[k]);

@@ -36,12 +36,13 @@
 #' \code{\link{data.frame}}.
 #' @param y An optional second set of coordinates in the same dimensions as
 #' argument \code{x}.
-#' @param cov The covariance (or inverse covariance) matrix or a vector of
-#' weights.
+#' @param cov The covariance (or inverse covariance) matrix of the distribution.
 #' @param squared Should the squared Euclidean distances be returned (default:
 #' FALSE).
 #' @param inverted A \code{logical} specifying whether \code{cov} contains the
 #' inverse of the covariance matrix (default: \code{FALSE}).
+#' @param ... Arguments to be passed to \code{solve} for computing the inverse
+#' of the covariance matrix (if \code{inverted == FALSE}).
 #' 
 #' @return A `\link{dist}-class` object or, whenever \code{y} is provided,
 #' a \code{\link{matrix}} with as many rows as the number of rows in \code{x}
@@ -75,24 +76,31 @@
 #' @useDynLib codep, .registration = TRUE
 #' 
 #' @export
-Mahal <- function(x, y, cov, squared = FALSE, inverse = FALSE) {
+Mahal <- function(x, y, cov, squared = FALSE, inverse = FALSE, ...) {
   m <- NCOL(x)
   if (!is.matrix(x))
     x <- as.matrix(x)
   storage.mode(x) <- "double"
+  if(!is.matrix(cov))
+    stop("Argument 'cov' must be a matrix!")
+  if(nrow(cov) != ncol(cov))
+    stop("Argument 'cov' must be a square matrix!")
+  if(!inverse)
+    cov <- solve(cov, ...)
+  storage.mode(cov) <- "double"
   if (!missing(y)) {
-    if(NCOL(y)!=m)
+    if(NCOL(y) != m)
       stop("'y' must have the same number of coordinates as 'x'!")
     if(!is.matrix(y))
       y <- as.matrix(y)
     storage.mode(y) <- "double"
-    N <- c(NROW(x),NROW(y))
+    N <- c(NROW(x), NROW(y))
     out <- matrix(0, N[2L], N[1L])
     rownames(out) <- dimnames(y)[[1L]]
     colnames(out) <- dimnames(x)[[1L]]
   } else {
     N <- c(NROW(x),NROW(x))
-    out <- double(N[1L]*(N[1L]-1L)/2)
+    out <- double(N[1L]*(N[1L] - 1L)/2)
   }
   res <- .C(
     "dist_Mahal",
@@ -102,10 +110,11 @@ Mahal <- function(x, y, cov, squared = FALSE, inverse = FALSE) {
     missing(y),
     m,
     out,
+    cov,
     squared
   )
   out[] <- res[[6L]]
-  attr(out, "method") <- "euclidean"
+  attr(out, "method") <- "mahalanobis"
   attr(out, "call") <- match.call()
   if (missing(y)) {
     attr(out, "Size") <- N[1L]

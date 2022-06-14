@@ -39,8 +39,7 @@
 // C function declarations
 
 void dist_Mahal(double* from, double* to, int* n, int* tri, int* m,
-                double* cov,
                 double* d,
-                int* sq, int* wt);
+                double* cov, int* sq);
 
 #endif
