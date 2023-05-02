@@ -1,0 +1,218 @@
+---
+title: "Making Predictions Using Spatial Eigenvector Maps"
+author: "Guillaume Guénard"
+date: "`r Sys.Date()`"
+bibliography: SpacePredictions.bib
+csl: ecology.csl
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Preamble
+
+Moran's eigenvector maps [@dray_spatial_2006] are used to represent spatial
+variation in models. It achieves this by providing sets of orthogonal variables
+generated from the pairwise distances among the sampling sites. The latter are
+calculated from geodesic or Cartesian (i.e., projected) site coordinates.
+Moran's eigenvector maps gets their names from the Moran's index, as their is
+a simple correspondence between the eigenvalues associated with each spatial
+eigenvector and the Moran index calculated on that spatial eigenvector.
+
+
+Moran's eigenvector maps calculation as defined in @dray_spatial_2006 proceeds
+from a binary matrix of connectivity among locations $\mathbf{B} = [b_{i,j}]$,
+which can be obtained from a matrix of pairwise distances among locations
+($\mathbf{D} = [d_{i,j}]$, e.g., a Cartesian or geodesic two-dimensional space,
+a three-dimensional Euclidean space, a one-dimensional transect) or a list of
+edges from a connectivity graph, such as that resulting, for instances, from a
+Delauney triangulation or a minimum spanning tree. The distance matrix is
+transformed into a matrix of edge weights $\mathbf{W} = [w_{i,j}]$ using a
+distance-weighting function. Matrices $\mathbf{B}$ and $\mathbf{W}$ are then
+Haddamar-multiplied, resulting in a weighted connectivity matrix. This matrix
+is row- and column-centred to a value of $0$ and submitted to eigenvalue
+decomposition. By virtue of the centring to $0$, the centred weighted
+connectivity matrix has a rank of at most $n - 1$, where $n$ is the number of
+different locations, and thus at most $n - 1$ non-zero eigenvalues and
+eigenvectors. The whole process can be written as follows:
+
+$$
+\mathbf{Q} \{\mathbf{B} * \mathbf{W}\} \mathbf{Q} = \mathbf{U}\mathbf{D}_\lambda\mathbf{U}^\mathsf{T},
+$$
+
+where $\mathbf{Q} = \mathbf{I}_{n} - \frac{1}{n} \mathbf{1}_{n \times n}$ is the idempotent centring matrix of
+dimension $n \times n$, $*$ denoted the Haddamar (element-wise) product of the
+matrices, $\mathbf{U}$ is a matrix of eigenvectors (dimensions:
+$n \times k \leq (n - 1)$) and $\mathbf{D}_\lambda$ is a diagonal matrix of
+(non-zero) eigenvalues. Following Dray... there is an algebraic equivalence
+between these eigenvalues and the Moran's index ($I$) of their corresponding
+eigenvectors, had $\mathbf{B}*\mathbf{W}$ been used as the spatial weights
+matrix during the index calculation. Assuming the values of the diagonal of
+$\mathbf{B}*\mathbf{W}$ to be $0$s equivalence is as follows:
+
+$$
+I_{\lambda_k} = n \frac{\lambda_k}{\sum_{\forall i,j}b_{i,j}w_{i,j}},
+$$
+
+Three distance weighting functions have been proposed by @dray_spatial_2006
+(Table ...)
+
+Generate caption here
+
+| Name         | Symbol   | Definition                                        |
+| :---         | :---:    |                                              ---: |
+| Linear       | $f_l$    | $w_i = 1-\frac{d_i}{d_{max}}$                     |
+| Concave up   | $f_{cu}$ | $w_i = 1-\left(\frac{d_i}{d_{max}}\right)^\alpha$ |
+| Concave down | $f_{cd}$ | $w_i = \frac{1}{d_i^\alpha}$                      |
+
+Notes:
+
+* $d_{max}$ is the maximum distance between two neighbours
+
+* $\alpha$ is a shape parameter
+
+---
+
+## Making predictions
+
+### Continuous spatial operator
+
+In this paper, we are interested in the behaviour of Moran's in between the
+sampling locations, in order to assess their potential as bases for spatial
+interpolation. For interpolation, we expected that the smoothness of the spatial
+operator to be consequential to the smoothness of the resulting spatial
+eigenfunctions, thereby impacting their adequacy for representing continuous
+spatial phenomenons. For simplification sake, we will restrict the definition of
+connectivity to be strictly distance-based and thus disregard graph-based
+definitions. This simplification enables us to formalize both the connectivity
+ans spatial weighting into single equations as follows:
+
+$$
+w_i =
+  \begin{cases}
+    d \leq d_{max}, 1-\frac{d_i}{d_{max}} \\
+    d > d_{max}, 0 \\
+  \end{cases}
+$$
+
+for the linear weighting function,
+
+$$
+w_i =
+  \begin{cases}
+    d \leq d_{max}, 1-\left(\frac{d_i}{d_{max}}\right)^\alpha \\
+    d > d_{max}, 0 \\
+  \end{cases}
+$$
+
+for the concave up function, and
+
+$$
+w_i =
+  \begin{cases}
+    d \leq d_{max}, \frac{1}{(1 + d_i)^\alpha} \\
+    d > d_{max}, 0 \\
+  \end{cases}
+$$
+
+for the concave down function. Notice that the latter had to be altered from the
+original proposition by @dray_spatial_2006 in order to become continuous at
+$d_{i,j} = 0$. These functions take the values $0$ for distances above
+$d_{max}$, thereby involving thresholding in an implicit, distance-based,
+manner and disregard $\mathbf{B}$, since $\mathbf{W}$ now comes with an implicit
+threshold $d \leq d_{max}$. On the other hand, this definition implies that the
+value $1$ is consistently found on the diagonal of $\mathbf{W}$, which alter the
+equivalence between the eigenvector and eigenvector's associated Moran's index
+as follows:
+
+$$
+I_{\lambda_k} = n \frac{\lambda_k - 1}{\sum_{\forall i,j} w_{i,j}},
+$$
+
+Therefore, using a continuous spatial operator has very little impact in the
+interpretability of the eigenvectors with respect to the Moran's index.
+
+### Calculating eigenfunction values between the locations
+
+One can represent the spatial eigenvectors from the centred weights matrix by
+performing a simple algebraic reorganization of the eigensystem equation
+presented earlier as follows:
+
+$$
+\begin{align*}
+\left(\mathbf{I}_n - \frac{1}{n} \mathbf{1}_{n \times n}\right) \mathbf{W} \left(\mathbf{I}_n - \frac{1}{n} \mathbf{1}_{n \times n}\right) &= \mathbf{U} \mathbf{D}_\lambda \mathbf{U}^\mathsf{T} \\
+\mathbf{I}_n \mathbf{W} \mathbf{I}_n - \frac{1}{n} \mathbf{I}_n \mathbf{W} \mathbf{1}_{n \times n} - \frac{1}{n} \mathbf{1}_{n \times n} \mathbf{W} \mathbf{I}_n + \frac{1}{n^2} \mathbf{1}_{n \times n} \mathbf{W} \mathbf{1}_{n \times n}  &= \mathbf{U}\mathbf{D}_\lambda \mathbf{U}^\mathsf{T} \\
+\mathbf{W} - \frac{1}{n} \mathbf{W} \mathbf{1}_{n \times n} - \frac{1}{n} \mathbf{1}_{n \times n} \mathbf{W} + \frac{1}{n^2} \mathbf{1}_{n \times n} \mathbf{W} \mathbf{1}_{n \times n}  &= \mathbf{U}\mathbf{D}_\lambda \mathbf{U}^\mathsf{T} \\
+\left( \mathbf{W} - \frac{1}{n} \mathbf{W} \mathbf{1}_{n \times n} - \frac{1}{n} \mathbf{1}_{n \times n} \mathbf{W} + \frac{1}{n^2} \mathbf{1}_{n \times n} \mathbf{W} \mathbf{1}_{n \times n}  \right) \mathbf{U} \mathbf{D}_{\lambda^{-1}} &= \mathbf{U} \\
+\end{align*}
+$$
+
+Let $\mathbf{W}^*$ be the weight matrix calculated for $m$ new locations using
+the same weighting function as for $\mathbf{W}$ and the distances between the
+new locations and the original ones found in $\mathbf{W}$ (hence, the dimensions
+of $\mathbf{W}^*$ are $m \times n$). The values of these new locations on the
+spatial eigenfunctions defined previously are obtained as follows:
+
+$$
+\mathbf{U}^* = \left( \mathbf{W}^* - \frac{1}{n} \mathbf{W}^* \mathbf{1}_{n \times n} - \frac{1}{n} \mathbf{1}_{m \times n} \mathbf{W} + \frac{1}{n^2} \mathbf{1}_{m \times n} \mathbf{W} \mathbf{1}_{n \times n}  \right) \mathbf{U} \mathbf{D}_{\lambda^{-1}},
+$$
+
+where the matrix of spatial eigenfunction values $\mathbf{U}^*$ has dimensions
+$m \times k$, with $k$ being the number of non-zero eigenvalues in the
+eigensystem. Using that approach, it is possible to calculate the values of the
+spatial eigenfunctions for out-of-sample locations, and thus perform spatial
+interpolation. However, we have yet to provide an assessment of the adequacy of
+existing MEM distance weighting functions for such a purpose.
+
+
+
+
+
+the purpose, we will begin to restrict ourselves to a
+definition of  that 
+
+
+
+
+
+the spatial weighting
+function may matter and the way connectivity is defined 
+
+
+
+
+
+
+
+
+
+
+
+
+This relationship depends on whether the
+ are assumed to be or
+$1$s.
+
+
+
+
+
+
+a list of edges or   Here, we will simplify
+this framework 
+
+
+
+
+Moran's eigenvector maps involves that diagonal elements of $\mathbf{W}$ has the
+value $0$. However, this would break the smoothness of the weighting function
+
+
+
+
+# Reference
